@@ -26,6 +26,8 @@ class Machine(db.Model):
 			.filter('active', True)\
 			.count() > 0 
 
+	def 
+
 """
 Certifies that a user can use, install, repair or maintain a piece of
 complex equipment.
@@ -35,7 +37,6 @@ class Certification(db.Model):
 	trainer     = db.UserProperty()
 	class_stamp = db.DateTimeProperty()
 	quiz_stamp  = db.DateTimeProperty()
-	passed_quiz = db.BooleanProperty()
 	active      = db.BooleanProperty(default=True)
 	notes       = db.TextProperty()
 	skill_type  = db.StringProperty(
@@ -54,9 +55,6 @@ class Certification(db.Model):
 		required=True,
 		choices=machine_types
 	)
-
-	def is_valid(self):
-		return self.passed_quiz
 
 """
 Registers when a machine is used, out of order, repaired, or maintained.
