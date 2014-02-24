@@ -11,10 +11,10 @@ class TestMachine(util.IsolatedTestCase):
 		machine.put()
 
 	def test_machine_creation(self):
-		machine = Machine(name='Chainsaw')
+		machine = Machine(name='Chainsaw', type="test_machine")
 		self.assertTrue(machine.name, 'Chainsaw')
 
 	def test_machine_save(self):
-		machine = Machine(name='Chainsaw')
+		machine = Machine(name='Chainsaw', type="test_machine")
 		machine.put()
 		self.assertEqual(Machine.all().count(), 1)

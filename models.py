@@ -6,11 +6,25 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import login_required
 
+machine_types = (
+	'test_machine', # useless in production, obviously :)
+	'laser_cutter'
+)
+
 """
 A piece of expensive equipment we would like to protect via RFID.
 """
 class Machine(db.Model):
-	name   = db.StringProperty(required=True)
+	name   = db.StringProperty(required=True),
+	type   = db.StringProperty(choices=machine_types, required=True)
+
+	def authorize(self, user, use):
+		return Certification.all()\
+			.filter('user', user)\
+			.filter('skill_type', use)\
+			.filter('machine_type', self.type)\
+			.filter('active', True)\
+			.count() > 0 
 
 """
 Certifies that a user can use, install, repair or maintain a piece of
@@ -18,13 +32,14 @@ complex equipment.
 """
 class Certification(db.Model):
 	user        = db.UserProperty()
-	machine     = db.ReferenceProperty(Machine)
 	trainer     = db.UserProperty()
 	class_stamp = db.DateTimeProperty()
 	quiz_stamp  = db.DateTimeProperty()
 	passed_quiz = db.BooleanProperty()
+	active      = db.BooleanProperty(default=True)
 	notes       = db.TextProperty()
 	skill_type  = db.StringProperty(
+		required=True,
 		choices=(
 			'use',       # The user can operate the machine
 			'install',   # The user can install new machines
@@ -35,6 +50,13 @@ class Certification(db.Model):
 			'train_maintain' # maintain the machine.
 		)
 	)
+	machine_type = db.StringProperty(
+		required=True,
+		choices=machine_types
+	)
+
+	def is_valid(self):
+		return self.passed_quiz
 
 """
 Registers when a machine is used, out of order, repaired, or maintained.
