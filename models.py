@@ -26,8 +26,6 @@ class Machine(db.Model):
 			.filter('active', True)\
 			.count() > 0 
 
-	def 
-
 """
 Certifies that a user can use, install, repair or maintain a piece of
 complex equipment.
