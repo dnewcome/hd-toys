@@ -10,13 +10,12 @@ from google.appengine.ext.webapp.util import login_required
 A piece of expensive equipment we would like to protect via RFID.
 """
 class Machine(db.Model):
-	name   = db.StringProperty()
+	name   = db.StringProperty(required=True)
 
 """
 Certifies that a user can use, install, repair or maintain a piece of
 complex equipment.
 """
-
 class Certification(db.Model):
 	user        = db.UserProperty()
 	machine     = db.ReferenceProperty(Machine)
@@ -41,7 +40,7 @@ class Certification(db.Model):
 Registers when a machine is used, out of order, repaired, or maintained.
 """
 class MachineLog(db.Model):
-	user          = db.UserProperty()
+	user          = db.UserProperty(required=True)
 	rfid          = db.IntegerProperty()
 	machine       = db.ReferenceProperty(Machine)
 	start_stamp   = db.DateTimeProperty()

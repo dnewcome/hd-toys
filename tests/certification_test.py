@@ -1,6 +1,7 @@
 from main import app
 from models import Machine, Certification
 import util
+import unittest
 
 class TestCertification(util.IsolatedTestCase):
 
