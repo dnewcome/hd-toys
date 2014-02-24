@@ -6,13 +6,15 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import login_required
 
+from datetime import datetime
+
 machine_types = (
 	'test_machine', # useless in production, obviously :)
 	'laser_cutter'
 )
 
 """
-A piece of expensive equipment we would like to protect via RFID.
+" A piece of expensive equipment we would like to protect via RFID.
 """
 class Machine(db.Model):
 	name   = db.StringProperty(required=True),
@@ -26,9 +28,31 @@ class Machine(db.Model):
 			.filter('active', True)\
 			.count() > 0 
 
+	def logs(self, user=False):
+		q = MachineLog.all()
+		if user:
+			q.filter('user', user)
+		q.filter('machine', self)
+		return q
+
+	def begin_use(self, user, use):
+		MachineLog(user=user, event_type=use, machine=self).put()
+
+	def end_use(self, user):
+		log_item = MachineLog.all()\
+			.filter('user', user)\
+			.filter('machine', self)\
+			.order('-start_stamp')\
+			.get()
+		if not log_item:
+			raise Exception("Machine log event not found.")
+		else:
+			log_item.end_stamp = datetime.now()
+			log_item.put()
+
 """
-Certifies that a user can use, install, repair or maintain a piece of
-complex equipment.
+" Certifies that a user can use, install, repair or maintain a piece of
+" complex equipment.
 """
 class Certification(db.Model):
 	user        = db.UserProperty()
@@ -55,13 +79,12 @@ class Certification(db.Model):
 	)
 
 """
-Registers when a machine is used, out of order, repaired, or maintained.
+" Registers when a machine is used, out of order, repaired, or maintained.
 """
 class MachineLog(db.Model):
 	user          = db.UserProperty(required=True)
-	rfid          = db.IntegerProperty()
 	machine       = db.ReferenceProperty(Machine)
-	start_stamp   = db.DateTimeProperty()
+	start_stamp   = db.DateTimeProperty(auto_now_add=True)
 	end_stamp     = db.DateTimeProperty()
 	notes         = db.TextProperty()
 	material_cost = db.IntegerProperty()
