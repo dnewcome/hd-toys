@@ -24,6 +24,11 @@ class TestMachine(util.IsolatedTestCase):
 		user    = self.mockUser(certs = {'test_machine': ['use'] } )
 		self.assertTrue(machine.authorize(user, 'use'))
 
+	def test_machine_unauthorized(self):
+		machine = self.mockMachine()
+		user    = self.mockUser()
+		self.assertFalse(machine.authorize(user, 'use'))
+
 	def test_begin_use(self):
 		machine = self.mockMachine()
 		user    = self.mockUser(certs = {'test_machine': ['use'] } )
