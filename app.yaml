@@ -1,0 +1,18 @@
+application: hd-toys
+version: 1
+runtime: python27
+threadsafe: true
+api_version: 1
+
+inbound_services:
+- mail
+- channel_presence
+
+builtins:
+- appstats: on
+- deferred: on
+
+# Not sure why, exactly, GAE complains when django isn't listed here.
+libraries:
+- name: django
+  version: 1.4
