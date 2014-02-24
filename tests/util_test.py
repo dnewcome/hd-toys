@@ -20,3 +20,7 @@ class TestUtil(util.IsolatedTestCase):
 		machine = Machine(name='Tesla Coil')
 		machine.put()
 		self.assertEqual(Machine.all().count(), 1)
+
+	def test_user_stub(self):
+		user = self.setUser()
+		self.assertEqual(user.email(), 'test@hackerdojo.com')

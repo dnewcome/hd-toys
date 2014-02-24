@@ -1,6 +1,7 @@
 import unittest
 from main import app
 from google.appengine.ext import testbed
+from google.appengine.api.users import get_current_user
 
 class IsolatedTestCase(unittest.TestCase):
 
@@ -29,10 +30,15 @@ class IsolatedTestCase(unittest.TestCase):
 	def tearDown(self):
 		self.testbed.deactivate()
 
-	def setCurrentUser(self, email='test@hackerdojo.com', key=1, admin=0):
+	def setUser(self, email='test@hackerdojo.com', key=1, admin=0):
 		self.testbed.setup_env(
-			USER_EMAIL=email,
-			USER_ID=key,
-			USER_IS_ADMIN=admin
+			USER_EMAIL=unicode(email),
+			USER_ID=unicode(key),
+			USER_IS_ADMIN=unicode(admin),
+			overwrite=True
 		)
 		self.testbed.init_user_stub()
+		return get_current_user()
+
+	def destroyUser(self):
+		self.setUser(email=None, key=None)
