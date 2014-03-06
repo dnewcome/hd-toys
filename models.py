@@ -5,6 +5,10 @@ from google.appengine.api.users import User
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.ext.webapp.util import login_required
+from config import config
+
+import urllib2
+import json
 
 from datetime import datetime
 
@@ -12,6 +16,20 @@ machine_types = (
 	'test_machine', # useless in production, obviously :)
 	'laser_cutter'
 )
+
+class RFID():
+
+	@staticmethod
+	def fetch_member(id):
+		# Really need to implement a better data sharing strategy between apps.
+		url = config['rfid_url'] + id
+		try:
+			result = urllib2.urlopen(url).read()
+		except urllib2.URLError, e:
+			raise Exception("Couldn't connect to the member database.")
+		data = json.loads(result)
+		user = User( "%s@hackerdojo.com" % data['username'] )
+		return user
 
 """
 " A piece of expensive equipment we would like to protect via RFID.
