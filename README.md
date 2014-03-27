@@ -4,3 +4,7 @@ This is an App Engine app to provide an RFID safety lock for toys/tools like the
 
 Currently deployed at:
 http://hd-toys.appspot.com
+
+Development console at
+http://hd-toys.appspot.com/admin/
+
