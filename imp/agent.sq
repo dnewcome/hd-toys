@@ -1,0 +1,61 @@
+const URL = "http://hd-toys.appspot.com/verify";
+
+function check(rfidKey) {
+    if (rfidKey == "05003B634E13" || rfidKey == "0600790EA6D7" || rfidKey == "28003055CB86") {
+    server.log("asking device to turn laser on");
+    device.send("laser", 1);
+    } else {
+    server.log("asking device to turn laser off");
+    device.send("laser", 0);
+    }
+}
+
+function check2(rfidKey) {
+    rfidKey = rfidKey.slice(2,10);
+    rfidKey = hexToInt(rfidKey);
+    rfidKey = format("%010i", rfidKey);
+    server.log(rfidKey);
+    local url = URL + "?machine=laser_cutter&rfid="+rfidKey; 
+    server.log(url);
+    http.get(url).sendasync(function (res) {
+        if (res.statuscode != 200) server.log("Error posting: " + res.statuscode);
+        local data = http.jsondecode(res.body);
+        server.log("data returned");
+        server.log(data);
+        if (data == 1) {
+            server.log("asking device to turn laser on");
+            device.send("laser", 1);
+        } else {
+            server.log("asking device to turn laser OFF");
+            device.send("laser", 0);
+        }
+    })
+}
+
+device.on("key", function(key) {
+    server.log("checking key: "+key);
+    check2(key);
+}); 
+
+function hexToInt(hex) {
+    local result = 0;
+    local shift = hex.len() * 4;
+
+    for(local d=0; d<hex.len(); d++) {
+        local digit;
+
+        // Convert from ASCII Hex to integer
+        if(hex[d] >= 0x61)
+            digit = hex[d] - 0x57;
+        else if(hex[d] >= 0x41)
+            digit = hex[d] - 0x37;
+        else
+            digit = hex[d] - 0x30;
+
+        // Accumulate digit
+        shift -= 4;
+        result += digit << shift;
+    }
+
+    return result;
+}

@@ -1,0 +1,61 @@
+server.log("Device Started");
+rfid <- hardware.uart57;
+led <- hardware.pin1;
+lastEnabled <- hardware.millis();
+reading <- false;
+key <- "";
+led.configure(DIGITAL_OUT);
+ 
+function readRfid() {
+    local b = rfid.read();
+    while(b != -1) {
+        if (b == 2) {
+            // start of rfid code
+            reading = true;
+        } else if (b == 3) {
+            // end of rfid code
+            reading = false;
+            server.log("read key: <"+key+">");
+            agent.send("key", key);
+            key = "";
+        } else if (reading) {
+            key += format("%c", b);
+        }
+        b = rfid.read();
+    }
+}
+ 
+rfid.configure(9600, 8, PARITY_NONE, 1, NO_CTSRTS, readRfid);
+
+function turnOff() {
+    // turn off the laser in 5 minutes if user has not scanned rfid in
+    // the allotted time.
+    local diff = hardware.millis() - lastEnabled;
+    if (diff > 590000) {
+        server.log("turning off laser due to 5 minutes elapsed");
+        led.write(0);
+    }
+}
+
+function askForRfid() {
+    // make some noise and ask user to rescan rfid
+    // TODO...
+    server.log("asking for rfid");
+    
+    // turn off laser in 5 minutes
+    imp.wakeup(300, turnOff);
+}
+ 
+agent.on("laser", function(choice) {
+    if (choice == 1) {
+        // unlock device (turn laser on)
+        server.log("turning laser on");
+        led.write(1);
+        lastEnabled = hardware.millis();
+        imp.wakeup(300, askForRfid);
+    } else {
+        // lock device (turn laser off)
+        server.log("turning laser off");
+        led.write(0);
+    }
+});

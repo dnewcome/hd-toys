@@ -1,0 +1,7 @@
+This folder contains the code for the Electric Imp device that handles scanning member 
+RFIDs.
+
+The code can be synced to the Imp using the IDE at the following URL:
+
+https://ide.electricimp.com/ide/models/22709/devices/2340a7b236a7c9ee
+
