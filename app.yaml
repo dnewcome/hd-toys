@@ -18,5 +18,9 @@ libraries:
   version: 1.4
 
 handlers:
+- url: /admin/.*
+  script: google.appengine.ext.admin.application
+  login: admin
+
 - url: /.*
   script: main.app
