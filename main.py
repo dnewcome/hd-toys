@@ -1,5 +1,7 @@
 #!/usr/bin/env python
  
+import logging
+from google.appengine.api.users import User
 from google.appengine.api import users
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
@@ -32,8 +34,10 @@ class UsageHandler(webapp.RequestHandler):
 
 class CertificationHandler(webapp.RequestHandler):
 	def get(self):
+
 		self.response.headers['Content-Type'] = 'text/plain'
-		user = RFID.fetch_member(self.request.get('rfid'))
+		# user = RFID.fetch_member(self.request.get('rfid'))
+		user = User( "%s@hackerdojo.com" % self.request.get('username') )
 		if user:
 			data = {
 				'user': user,
@@ -43,7 +47,10 @@ class CertificationHandler(webapp.RequestHandler):
 				'machine_type': self.request.get('machine')
 			}
 			cert = Certification(**data).put()
-		self.response.out.write("OK.")
+			self.response.out.write("OK.")
+		else:
+			self.response.out.write("No user found.")
+			
 
 app = webapp.WSGIApplication([
   ('/', MainHandler),
